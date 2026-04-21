@@ -182,5 +182,5 @@ def load_mri_volume(case_dir: Path) -> np.ndarray:
             if std > 0:
                 volume_5ch[i] = (ch - mean) / (std + 1e-6)
 
-    return _resize_volume(volume_5ch, target_shape=(96, 96, 96))
+    return _resize_volume(volume_5ch, target_shape=(256, 256, 32))
 

@@ -19,6 +19,7 @@ def build_parser() -> argparse.ArgumentParser:
     train_parser.add_argument("--fit-splits", nargs="+", default=("train",))
     train_parser.add_argument("--val-splits", nargs="+", default=("val",))
     train_parser.add_argument("--max-breasts", type=int, default=None)
+    train_parser.add_argument("--max-batches", type=int, default=None)
     train_parser.add_argument("--epochs", type=int, default=50)
     train_parser.add_argument("--batch-size", type=int, default=4)
     train_parser.add_argument("--learning-rate", type=float, default=1e-3)
@@ -67,6 +68,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             target_specificity=args.target_specificity,
             target_sensitivity=args.target_sensitivity,
             selection_metric=args.selection_metric,
+            max_batches=args.max_batches,
         )
         torch.save(model.state_dict(), args.artifact)
         print(f"Model saved to {args.artifact}")

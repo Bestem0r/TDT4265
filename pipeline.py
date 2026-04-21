@@ -51,6 +51,7 @@ def train_model_pytorch(
 	target_specificity: float = 0.90,
 	target_sensitivity: float = 0.90,
 	selection_metric: str = "aggregate",
+	max_batches: int | None = None,
 ) -> BreastCNN:
 	train_records = load_breast_records(data_root, splits=tuple(fit_splits), max_breasts=max_breasts)
 	if not train_records:
@@ -64,7 +65,7 @@ def train_model_pytorch(
 	if val_splits:
 		print(f"Loaded {len(val_records)} validation samples")
 
-	train_dataset = BreastMRIDataset(train_records, augment=True)
+	train_dataset = BreastMRIDataset(train_records, augment=False)
 	train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=0)
 	val_loader = None
 	if val_records:
@@ -101,6 +102,8 @@ def train_model_pytorch(
 		model.train()
 		total_loss = 0.0
 		n_batches = len(train_loader)
+		if max_batches is not None:
+			n_batches = min(n_batches, max_batches)
 
 		for batch_idx, (volumes, labels) in enumerate(train_loader, start=1):
 			volumes, labels = volumes.to(DEVICE), labels.to(DEVICE)
@@ -120,6 +123,9 @@ def train_model_pytorch(
 					f"batch {batch_idx}/{n_batches} "
 					f"loss={loss.item():.4f} avg={avg_so_far:.4f} eta={eta_sec:.0f}s"
 				)
+
+			if max_batches is not None and batch_idx >= max_batches:
+				break
 
 		train_loss = total_loss / max(n_batches, 1)
 		metric_for_best = train_loss
